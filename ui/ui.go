@@ -62,6 +62,7 @@ func healthcheckHandler(cfg Config) http.Handler {
 		_, err := db.GetAllTasks(cfg.DB)
 
 		if err != nil {
+			w.WriteHeader(http.StatusServiceUnavailable)
 			fmt.Fprintf(w, "Error: db connection down")
 			return
 		}
