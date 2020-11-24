@@ -6,11 +6,12 @@
 
 ## Pre-requisites
 1. Empty AWS Account
-   1. Necessary service link roles created (RDS & ECS, ELB exist however)
+   1. Necessary service link roles created (RDS, ECS & ELB exist however)
 2. CircleCI Account
 3. Terraform installed `Terraform v0.13.5` on the machine doing the deployment
-4. AWS Credentials for a user to run terraform as the default AWS profile on the machine running terraform.
+4. AWS Credentials for a user to run terraform as the default AWS profile on the machine running terraform.  In practice I used `AdministratorAccess` but in practice this is too much
 5. AWS CLI installed on the machine executing terraform
+6. AWS Credentials for CircleCI to deploy by running ecs update-service.  I used `AmazonECS_FullAccess` but in practice this is too much access.
 
 ## Architecture
 ### In AWS
@@ -23,14 +24,21 @@
    2. It should be rotating - hard to do without app modifications
    3. The retention window for the secret makes `terraform destroy && terraform apply` fail.
 4. Use an ecs task independently to run updatedb
+5. Use ALB in public subnets to route traffic on port 80 to containers.
+6. Health check performed by ALB not ECS
 
 ### CI/CD
-1. Continue to use CircleCI for CI
+1. Continue to use CircleCI for CI of container
 2. Use dockerhub for container deployment
+3. Run infra code locally, not under CI.
 
 ## Steps to provision
 1. Create an access key to docker hub for the user you'd like to deploy via.
 2. Provide access key and user of dockerhub to circleci in project settings -> environment as `DOCKER_USER` and `DOCKER_PASSWORD`
+3. Provide access key, access secret for CircleCI to deploy the application to the project settings:
+   1. `AWS_ACCESS_KEY_ID`
+   2. `AWS_SECRET_ACCESS_KEY`
+   3. `AWS_REGION` set to `ap-southeast-2`
 3. Run a build from circleCI to build the application and publish it to dockerhub
 4. Change the variable defaults to match the new docker container location in variables.tf inside `/infra`
 5. run `terraform init` && `terraform apply` from `infra/`

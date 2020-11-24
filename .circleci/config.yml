@@ -168,6 +168,9 @@ jobs:
           password: $DOCKER_PASSWORD
 
     steps:
+      - run: |
+          sudo apt-get install -y python-pip
+          sudo pip install awscli
       - checkout
       - setup_remote_docker:
           version: 19.03.13
@@ -175,6 +178,7 @@ jobs:
           docker build . -t $DOCKER_USER/techchallengeapp:latest
           echo $DOCKER_PASSWORD | docker login -u $DOCKER_USER --password-stdin
           docker push $DOCKER_USER/techchallengeapp:latest
+          aws ecs update-service --cluster webapp --service webapp --force-new-deployment || true
 
 workflows:
   version: 2
