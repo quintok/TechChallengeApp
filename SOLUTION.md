@@ -5,9 +5,10 @@
 # Solution Overview
 
 ## Pre-requisites
-3. Empty AWS Account
-4. CircleCI Account
-5. Terraform installed `Terraform v0.13.5` on the machine doing the deployment
+1. Empty AWS Account
+2. CircleCI Account
+3. Terraform installed `Terraform v0.13.5` on the machine doing the deployment
+4. AWS Credentials for a user to run terraform as the default AWS profile on the machine running terraform.
 
 ## Architecture
 ### In AWS
@@ -23,11 +24,11 @@
 ### CI/CD
 1. Continue to use CircleCI for CI
 2. Use dockerhub for container deployment
-3. Use local tfstate as there is too much messing around with remote state for this.
 
 ## Steps to provision
 1. Create an access key to docker hub for the user you'd like to deploy via.
 2. Provide access key and user of dockerhub to circleci in project settings -> environment as `DOCKER_USER` and `DOCKER_PASSWORD`
+3. initiate terraform apply from `infra/`
 
 # Commentary
 ## Choices
@@ -36,3 +37,4 @@
 3. No KMS used for encryption - price can be a good reason here but also would overcomplicate the solution
 4. Not to refactor to DynamoDB for cost - not a bad idea if this was to be hosted longer term as Aurora can eat up $$ for this size app.  Would simplify how to apply the schema.
 5. Not use Aurora Serverless - the approximate 1 minute spin-up time is too much for the app without changes.
+6. Use local tfstate as there is too much messing around with remote state for this.
