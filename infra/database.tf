@@ -16,7 +16,7 @@ module "database" {
 }
 
 resource "aws_secretsmanager_secret" "password" {
-  name = "password"
+  name                    = "password"
   recovery_window_in_days = 7
 }
 

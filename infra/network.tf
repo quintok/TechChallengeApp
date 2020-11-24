@@ -23,3 +23,21 @@ resource "aws_security_group" "application-security-group" {
   name   = "application"
   vpc_id = module.vpc.vpc_id
 }
+
+resource "aws_security_group_rule" "application-to-database" {
+  from_port                = module.database.this_rds_cluster_port
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.application-security-group.id
+  to_port                  = module.database.this_rds_cluster_port
+  type                     = "egress"
+  source_security_group_id = module.database.this_security_group_id
+}
+
+resource "aws_security_group_rule" "application-internet-egress" {
+  from_port         = 443
+  protocol          = "tcp"
+  security_group_id = aws_security_group.application-security-group.id
+  to_port           = 443
+  type              = "egress"
+  cidr_blocks       = ["0.0.0.0/0"]
+}
