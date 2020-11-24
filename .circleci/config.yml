@@ -158,7 +158,24 @@ jobs:
 
       - store_artifacts:
           path: output
-          
+
+  docker:
+    working_directory: /go/src/github.com/servian/TechChallengeApp
+    docker:
+      - image: circleci/golang:latest
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASSWORD
+
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 19.03.13
+      - run: |
+          docker build . -t $DOCKER_USER/techchallengeapp:latest
+          echo $DOCKER_PASSWORD | docker login -u $DOCKER_USER --password-stdin
+          docker push $DOCKER_USER/techchallengeapp:latest
+
 workflows:
   version: 2
   build_test_deploy:
@@ -172,3 +189,9 @@ workflows:
               only: master
             tags:
               ignore: /.*/
+      - docker:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
