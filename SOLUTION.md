@@ -11,11 +11,14 @@
 
 ## Architecture
 ### In AWS
-...
+1. Multi-AZ Deployment, 3 network tiers.  Public, Private and DB.
+   1. DB does not have NAT nor route to public/internet 
+   2. Private has NAT and route to public
 
 ### CI/CD
 1. Continue to use CircleCI for CI
 2. Use dockerhub for container deployment
+3. Use local tfstate as there is too much messing around with remote state for this.
 
 ## Steps to provision
 1. Create an access key to docker hub for the user you'd like to deploy via.
