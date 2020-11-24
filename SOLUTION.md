@@ -14,6 +14,11 @@
 1. Multi-AZ Deployment, 3 network tiers.  Public, Private and DB.
    1. DB does not have NAT nor route to public/internet 
    2. Private has NAT and route to public
+2. Aurora Regional cluster for HA
+3. Use secret manager to pass the database master credentials to the application.
+   1. This should not be the master creds
+   2. It should be rotating - hard to do without app modifications
+   3. The retention window for the secret makes `terraform destroy && terraform apply` fail.
 
 ### CI/CD
 1. Continue to use CircleCI for CI
@@ -23,3 +28,11 @@
 ## Steps to provision
 1. Create an access key to docker hub for the user you'd like to deploy via.
 2. Provide access key and user of dockerhub to circleci in project settings -> environment as `DOCKER_USER` and `DOCKER_PASSWORD`
+
+# Commentary
+## Choices
+1. 2 AZ network design - enough to show HA without being excessive
+2. NAT - this could be done without NAT and rely on service endpoints but that over-engineers the networking config.
+3. No KMS used for encryption - price can be a good reason here but also would overcomplicate the solution
+4. Not to refactor to DynamoDB for cost - not a bad idea if this was to be hosted longer term as Aurora can eat up $$ for this size app.  Would simplify how to apply the schema.
+5. Not use Aurora Serverless - the approximate 1 minute spin-up time is too much for the app without changes.

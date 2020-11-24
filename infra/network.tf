@@ -18,3 +18,8 @@ module "vpc" {
   enable_nat_gateway     = true
   one_nat_gateway_per_az = true
 }
+
+resource "aws_security_group" "application-security-group" {
+  name   = "application"
+  vpc_id = module.vpc.vpc_id
+}
