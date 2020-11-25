@@ -10,6 +10,11 @@ resource "aws_cloudwatch_log_group" "updatedb" {
   retention_in_days = 1
 }
 
+resource "aws_cloudwatch_log_group" "webapp" {
+  name              = "webapp"
+  retention_in_days = 1
+}
+
 resource "aws_iam_role" "ecs-execution" {
   name_prefix        = "ecs-execution"
   assume_role_policy = data.aws_iam_policy_document.ecs-assume-execution.json
@@ -69,4 +74,47 @@ resource "aws_ecs_task_definition" "updatedb" {
   cpu                      = 256
   memory                   = 512
   container_definitions    = data.template_file.task-definition-updatedb.rendered
+}
+
+resource "aws_ecs_service" "webapp" {
+  name             = "webapp"
+  cluster          = module.ecs.this_ecs_cluster_id
+  task_definition  = aws_ecs_task_definition.webapp.arn
+  launch_type      = "FARGATE"
+  desired_count    = 1
+  platform_version = "1.4.0"
+  load_balancer {
+    container_name = "webapp"
+    container_port = 3000
+    target_group_arn = aws_lb_target_group.application.arn
+  }
+  network_configuration {
+    subnets         = module.vpc.private_subnets
+    security_groups = [aws_security_group.application-security-group.id]
+  }
+}
+
+data "template_file" "task-definition-service" {
+  template = file("task-definition.tpl")
+  vars = {
+    container = var.docker-container
+    command   = jsonencode(["serve"])
+
+    database-password-arn = aws_secretsmanager_secret.password.arn
+    database-host         = module.database.this_rds_cluster_endpoint
+    database-port         = module.database.this_rds_cluster_port
+    database-username     = module.database.this_rds_cluster_master_username
+    database-name         = module.database.this_rds_cluster_database_name
+    log-group             = aws_cloudwatch_log_group.webapp.name
+  }
+}
+
+resource "aws_ecs_task_definition" "webapp" {
+  family                   = "webapp"
+  execution_role_arn       = aws_iam_role.ecs-execution.arn
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = 256
+  memory                   = 512
+  container_definitions    = data.template_file.task-definition-service.rendered
 }

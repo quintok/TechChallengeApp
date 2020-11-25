@@ -48,7 +48,7 @@
 ## Choices
 1. 2 AZ network design - enough to show HA without being excessive
 2. NAT - this could be done without NAT and rely on service endpoints but that over-engineers the networking config.
-3. No KMS used for encryption - price can be a good reason here but also would overcomplicate the solution
+3. No KMS used for e ncryption - price can be a good reason here but also would overcomplicate the solution
 4. Not to refactor to DynamoDB for cost - not a bad idea if this was to be hosted longer term as Aurora can eat up $$ for this size app.  Would simplify how to apply the schema.
 5. Not use Aurora Serverless - the approximate 1 minute spin-up time is too much for the app without changes.
 6. Use local tfstate as there is too much messing around with remote state for this.
@@ -57,3 +57,6 @@
    2. on infra build is a problem as there is no guarantee the container exists yet & all tasks are lost
    3. Changing the application to simplify this is too time expensive
    4. It is unlikely we need to run this >1 per environment which means doing it manually is not labour intensive
+8. No TLS.  Felt overdone to get valid TLS setup
+9. No nice domain name, simplify deploying in a new environment
+10. Health check was broken as it will always return a 200, even if access to DB is cut.

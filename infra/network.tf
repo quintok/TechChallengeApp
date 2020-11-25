@@ -41,3 +41,35 @@ resource "aws_security_group_rule" "application-internet-egress" {
   type              = "egress"
   cidr_blocks       = ["0.0.0.0/0"]
 }
+
+resource "aws_security_group" "frontend-lb" {
+  name   = "frontend-lb"
+  vpc_id = module.vpc.vpc_id
+}
+
+resource "aws_security_group_rule" "frontend-to-application" {
+  security_group_id        = aws_security_group.frontend-lb.id
+  from_port                = 3000
+  protocol                 = "tcp"
+  to_port                  = 3000
+  type                     = "egress"
+  source_security_group_id = aws_security_group.application-security-group.id
+}
+
+resource "aws_security_group_rule" "application-from-frontend" {
+  security_group_id        = aws_security_group.application-security-group.id
+  from_port                = 3000
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.frontend-lb.id
+  to_port                  = 3000
+  type                     = "ingress"
+}
+
+resource "aws_security_group_rule" "frontend-to-external" {
+  from_port         = 80
+  protocol          = "tcp"
+  security_group_id = aws_security_group.frontend-lb.id
+  to_port           = 80
+  type              = "ingress"
+  cidr_blocks       = ["0.0.0.0/0"]
+}
