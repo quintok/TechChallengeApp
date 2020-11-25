@@ -182,6 +182,8 @@ jobs:
           echo $DOCKER_PASSWORD | docker login -u $DOCKER_USER --password-stdin
           docker push $DOCKER_USER/techchallengeapp:latest
           aws configure set region $AWS_REGION
+          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+          aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
           aws ecs update-service --cluster webapp --service webapp --force-new-deployment || true
 
 workflows:
