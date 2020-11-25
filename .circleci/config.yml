@@ -178,6 +178,7 @@ jobs:
           docker build . -t $DOCKER_USER/techchallengeapp:latest
           echo $DOCKER_PASSWORD | docker login -u $DOCKER_USER --password-stdin
           docker push $DOCKER_USER/techchallengeapp:latest
+          aws configure set region $AWS_REGION
           aws ecs update-service --cluster webapp --service webapp --force-new-deployment || true
 
 workflows:
