@@ -168,14 +168,15 @@ jobs:
           password: $DOCKER_PASSWORD
 
     steps:
-      - run: |
-          sudo apt-get install -y unzip
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          unzip awscliv2.zip
-          sudo ./aws/install
       - checkout
       - setup_remote_docker:
           version: 19.03.13
+      - run: |
+          sudo apt-get install -y unzip
+          cd
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
       - run: |
           docker build . -t $DOCKER_USER/techchallengeapp:latest
           echo $DOCKER_PASSWORD | docker login -u $DOCKER_USER --password-stdin
